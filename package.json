@@ -1,0 +1,16 @@
+{
+  "name": "upload-ui-evidence-playwright-demo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Runnable Playwright demo for the Upload UI Evidence GitHub Action.",
+  "license": "AGPL-3.0-only",
+  "scripts": {
+    "test": "playwright test"
+  },
+  "engines": {
+    "node": "24.x"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.61.1"
+  }
+}
