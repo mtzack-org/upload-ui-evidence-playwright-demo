@@ -26,11 +26,14 @@ jobs:
       - run: npm test
 
       - name: Upload UI evidence
-        if: always()
+        if: ${{ always() && env.PORTAL_URL != '' && env.INGEST_TOKEN != '' }}
         uses: mtzack-org/upload-ui-evidence@v1
+        env:
+          PORTAL_URL: ${{ secrets.UI_EVIDENCE_PORTAL_URL }}
+          INGEST_TOKEN: ${{ secrets.UI_EVIDENCE_INGEST_TOKEN }}
         with:
-          portal-url: ${{ secrets.UI_EVIDENCE_PORTAL_URL }}
-          token: ${{ secrets.UI_EVIDENCE_INGEST_TOKEN }}
+          portal-url: ${{ env.PORTAL_URL }}
+          token: ${{ env.INGEST_TOKEN }}
           platform: web
           status: ${{ job.status }}
           screenshots: test-results/**/*.png
