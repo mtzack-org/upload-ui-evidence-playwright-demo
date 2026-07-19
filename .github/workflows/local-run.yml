@@ -1,0 +1,67 @@
+name: Local run API smoke
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  register:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Register a local-format run
+        env:
+          PORTAL_URL: ${{ vars.UI_EVIDENCE_PORTAL_URL }}
+          INGEST_TOKEN: ${{ secrets.UI_EVIDENCE_INGEST_TOKEN }}
+          COMMIT_SHA: ${{ github.sha }}
+          REPOSITORY: ${{ github.repository }}
+          ACTOR: ${{ github.actor }}
+          LOCAL_RUN_ID: local-${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          payload=$(jq -n \
+            --arg localRunId "$LOCAL_RUN_ID" \
+            --arg repository "$REPOSITORY" \
+            --arg commitSha "$COMMIT_SHA" \
+            --arg actor "$ACTOR" \
+            --arg startedAt "$(date -u +%Y-%m-%dT%H:%M:%S.000Z)" \
+            --arg commitUrl "https://github.com/$REPOSITORY/commit/$COMMIT_SHA" \
+            '{
+              source: "local",
+              localRunId: $localRunId,
+              repository: $repository,
+              workflow: "Local UI Tests",
+              status: "passed",
+              retention: "normal",
+              environment: "demo",
+              machine: "local-client-smoke",
+              devices: { web: "Chromium" },
+              branch: "main",
+              commitSha: $commitSha,
+              actor: $actor,
+              event: "local",
+              startedAt: $startedAt,
+              platforms: {
+                web: {
+                  status: "passed",
+                  total: 1,
+                  passed: 1,
+                  failed: 0,
+                  skipped: 0,
+                  durationMs: 1200
+                }
+              },
+              links: { commit: $commitUrl }
+            }')
+
+          response=$(curl --fail-with-body --silent --show-error \
+            -H "Authorization: Bearer $INGEST_TOKEN" \
+            -H "Content-Type: application/json" \
+            --data "$payload" \
+            "$PORTAL_URL/api/v1/runs")
+          run_id=$(jq -er '.id' <<<"$response")
+          run_url="$PORTAL_URL/runs/$run_id"
+
+          echo "Registered local run: $run_url"
+          echo "### Local run API smoke" >> "$GITHUB_STEP_SUMMARY"
+          echo "[Open the local-format run in UI Evidence Portal]($run_url)" >> "$GITHUB_STEP_SUMMARY"

@@ -12,6 +12,10 @@ Portal run.
 
 Open the [latest workflow runs](https://github.com/mtzack-org/upload-ui-evidence-playwright-demo/actions/workflows/playwright.yml), then open the `test` Job Summary.
 
+The separate [local run API smoke](https://github.com/mtzack-org/upload-ui-evidence-playwright-demo/actions/workflows/local-run.yml)
+registers a `source: local` payload without GitHub Actions run identifiers. It verifies that local
+test clients can register metadata directly with the same Portal API.
+
 ## Use it in your repository
 
 1. [Deploy the Portal](https://github.com/mtzack-org/ui-evidence-portal).
